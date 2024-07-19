@@ -971,7 +971,6 @@ declare module '@theme/MDXComponents' {
     readonly h6: (props: ComponentProps<'h6'>) => JSX.Element;
     readonly admonition: typeof Admonition;
     readonly mermaid: typeof Mermaid;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [tagName: string]: ComponentType<any>;
   };
 
@@ -1217,7 +1216,6 @@ declare module '@theme/NavbarItem/ComponentTypes' {
     readonly docSidebar: typeof DocSidebarNavbarItem;
     readonly docsVersion: typeof DocsVersionNavbarItem;
     readonly docsVersionDropdown: typeof DocsVersionDropdownNavbarItem;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [customComponentType: string]: ComponentType<any>;
   };
 
