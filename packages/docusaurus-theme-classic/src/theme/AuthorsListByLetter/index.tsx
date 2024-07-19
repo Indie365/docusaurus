@@ -7,17 +7,17 @@
 
 import React from 'react';
 import {type LetterEntry} from '@docusaurus/theme-common';
-import {listTagsByLetters} from '@docusaurus/theme-common/internal';
-import Tag from '@theme/Tag';
-import type {Props} from '@theme/TagsListByLetter';
+import {listAuthorsByLetters} from '@docusaurus/theme-common/internal';
+import Author from '@theme/Author';
+import type {Props} from '@theme/AuthorsListByLetter';
 import Heading from '@theme/Heading';
-import type {TagsListItem} from '@docusaurus/utils';
+import type {AuthorItemProp} from '@docusaurus/plugin-content-blog';
 import styles from './styles.module.css';
 
-function TagLetterEntryItem({
+function AuthorLetterEntryItem({
   letterEntry,
 }: {
-  letterEntry: LetterEntry<TagsListItem>;
+  letterEntry: LetterEntry<AuthorItemProp>;
 }) {
   return (
     <article>
@@ -25,9 +25,9 @@ function TagLetterEntryItem({
         {letterEntry.letter}
       </Heading>
       <ul className="padding--none">
-        {letterEntry.items.map((tag) => (
-          <li key={tag.permalink} className={styles.tag}>
-            <Tag {...tag} />
+        {letterEntry.items.map((author) => (
+          <li key={author.key} className={styles.author}>
+            <Author author={author} />
           </li>
         ))}
       </ul>
@@ -36,12 +36,12 @@ function TagLetterEntryItem({
   );
 }
 
-export default function TagsListByLetter({tags}: Props): JSX.Element {
-  const letterList = listTagsByLetters(tags);
+export default function AuthorsListByLetter({authors}: Props): JSX.Element {
+  const letterList = listAuthorsByLetters(authors);
   return (
     <section className="margin-vert--lg">
       {letterList.map((letterEntry) => (
-        <TagLetterEntryItem
+        <AuthorLetterEntryItem
           key={letterEntry.letter}
           letterEntry={letterEntry}
         />

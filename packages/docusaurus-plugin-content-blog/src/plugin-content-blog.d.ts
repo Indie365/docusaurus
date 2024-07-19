@@ -22,13 +22,7 @@ declare module '@docusaurus/plugin-content-blog' {
 
   export type Assets = {
     /**
-     * If `metadata.yarn workspace website typecheck
-4
-yarn workspace v1.22.19yarn workspace website typecheck
-4
-yarn workspace v1.22.19yarn workspace website typecheck
-4
-yarn workspace v1.22.19image` is a collocated image path, this entry will be the
+     * If `metadata.image` is a collocated image path, this entry will be the
      * bundler-generated image path. Otherwise, it's empty, and the image URL
      * should be accessed through `frontMatter.image`.
      */
@@ -66,9 +60,7 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
     [customAuthorSocialPlatform: string]: string;
   };
 
-  export type Author = {
-    key?: string; // TODO temporary, need refactor
-
+  export type AuthorAttributes = {
     /**
      * If `name` doesn't exist, an `imageURL` is expected.
      */
@@ -98,9 +90,40 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
      */
     socials?: AuthorSocials;
     /**
-     * Unknown keys are allowed, so that we can pass custom fields to authors,
+     * Description of the author.
+     */
+    description?: string;
+    /**
+     * Unknown keys are allowed, so that we can pass custom fields to authors.
      */
     [customAuthorAttribute: string]: unknown;
+  };
+
+  /**
+   * Metadata of the author's page, if it exists.
+   */
+  export type AuthorPage = {permalink: string};
+
+  /**
+   * Normalized author metadata.
+   */
+  export type Author = AuthorAttributes & {
+    /**
+     * Author key, if the author was loaded from the authors map.
+     * `null` means the author was declared inline.
+     */
+    key: string | null;
+    /**
+     * Metadata of the author's page.
+     * `null` means the author doesn't have a dedicated author page.
+     */
+    page: AuthorPage | null;
+  };
+
+  /** What the authors list page should know about each author. */
+  export type AuthorItemProp = Author & {
+    /** Number of blog posts with this author. */
+    count: number;
   };
 
   /**
@@ -194,7 +217,7 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
     last_update?: FrontMatterLastUpdate;
   };
 
-  export type BlogPostFrontMatterAuthor = Author & {
+  export type BlogPostFrontMatterAuthor = AuthorAttributes & {
     /**
      * Will be normalized into the `imageURL` prop.
      */
@@ -427,6 +450,10 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
       blogTagsListComponent: string;
       /** Root component of the "posts containing tag" page. */
       blogTagsPostsComponent: string;
+      /** Root component of the authors list page. */
+      blogAuthorsListComponent: string;
+      /** Root component of the "posts containing author" page. */
+      blogAuthorsPostsComponent: string;
       /** Root component of the blog archive page. */
       blogArchiveComponent: string;
       /** Blog page title for better SEO. */
@@ -471,6 +498,8 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
        *  (filter, modify, delete, etc...).
        */
       processBlogPosts: ProcessBlogPostsFn;
+      /* Base path for the authors page */
+      authorsPageBasePath: string;
       /** The behavior of Docusaurus when it finds inline authors. */
       onInlineAuthors: 'ignore' | 'log' | 'warn' | 'throw';
     };
@@ -508,12 +537,15 @@ yarn workspace v1.22.19image` is a collocated image path, this entry will be the
     items: BlogSidebarItem[];
   };
 
+  export type AuthorsMap = {[authorKey: string]: Author};
+
   export type BlogContent = {
     blogSidebarTitle: string;
     blogPosts: BlogPost[];
     blogListPaginated: BlogPaginated[];
     blogTags: BlogTags;
     blogTagsListPath: string;
+    authorsMap?: AuthorsMap;
   };
 
   export type BlogMetadata = {
@@ -677,6 +709,49 @@ declare module '@theme/BlogTagsListPage' {
   }
 
   export default function BlogTagsListPage(props: Props): JSX.Element;
+}
+
+declare module '@theme/BlogAuthorsListPage' {
+  import type {
+    AuthorItemProp,
+    BlogSidebar,
+  } from '@docusaurus/plugin-content-blog';
+
+  export interface Props {
+    /** Blog sidebar. */
+    readonly sidebar: BlogSidebar;
+    /** All authors declared in this blog. */
+    readonly authors: AuthorItemProp[];
+  }
+
+  export default function BlogAuthorsListPage(props: Props): JSX.Element;
+}
+
+declare module '@theme/BlogAuthorsPostsPage' {
+  import type {Content} from '@theme/BlogPostPage';
+  import type {
+    AuthorItemProp,
+    BlogSidebar,
+    BlogPaginatedMetadata,
+  } from '@docusaurus/plugin-content-blog';
+
+  export interface Props {
+    /** Blog sidebar. */
+    readonly sidebar: BlogSidebar;
+    /** Metadata of this author. */
+    readonly author: AuthorItemProp;
+    /** Link to the page of all authors. */
+    readonly authorsPageLink: string;
+    /** Looks exactly the same as the posts list page */
+    readonly listMetadata: BlogPaginatedMetadata;
+    /**
+     * Array of blog posts included on this page. Every post's metadata is also
+     * available.
+     */
+    readonly items: readonly {readonly content: Content}[];
+  }
+
+  export default function BlogAuthorsPostsPage(props: Props): JSX.Element;
 }
 
 declare module '@theme/BlogTagsPostsPage' {

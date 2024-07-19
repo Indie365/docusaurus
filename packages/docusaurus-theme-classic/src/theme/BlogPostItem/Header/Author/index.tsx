@@ -33,8 +33,9 @@ export default function BlogPostItemHeaderAuthor({
   author,
   className,
 }: Props): JSX.Element {
-  const {name, title, url, socials, imageURL, email} = author;
-  const link = url || (email && `mailto:${email}`) || undefined;
+  const {name, title, url, socials, imageURL, email, page} = author;
+  const link =
+    page?.permalink || url || (email && `mailto:${email}`) || undefined;
 
   const hasSocials = socials && Object.keys(socials).length > 0;
 
