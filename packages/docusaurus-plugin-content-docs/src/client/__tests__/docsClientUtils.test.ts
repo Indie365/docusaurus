@@ -19,6 +19,21 @@ import type {
   ActivePlugin,
   GlobalDoc,
 } from '@docusaurus/plugin-content-docs/client';
+import type {VersionMetadata} from '@docusaurus/plugin-content-docs';
+
+function createVersion(
+  partialVersion: Partial<VersionMetadata>,
+): GlobalVersion {
+  return {
+    name: partialVersion.label ?? '???',
+    label: partialVersion.label ?? '???',
+    path: partialVersion.path ?? '???',
+    isLast: partialVersion.isLast ?? false,
+    docs: [],
+    mainDocId: '???',
+    draftIds: [],
+  };
+}
 
 describe('docsClientUtils', () => {
   it('getActivePlugin', () => {
@@ -184,10 +199,82 @@ describe('docsClientUtils', () => {
     expect(getActiveVersion(data, '/docs/someDoc')?.name).toBe('version2');
 
     expect(getActiveVersion(data, '/docs/version1')?.name).toBe('version1');
-    expect(getActiveVersion(data, '/docs/version1')?.name).toBe('version1');
+    expect(getActiveVersion(data, '/docs/version1/')?.name).toBe('version1');
     expect(getActiveVersion(data, '/docs/version1/someDoc')?.name).toBe(
       'version1',
     );
+  });
+
+  it('getActiveVersion without trailing slash', () => {
+    const test: GlobalPluginData = {
+      path: 'docs',
+      versions: [
+        createVersion({label: 'current', path: '/docs', isLast: false}),
+        createVersion({
+          label: 'version2',
+          path: '/docs/version2',
+          isLast: true,
+        }),
+        createVersion({
+          label: 'version1',
+          path: '/docs/version1',
+          isLast: false,
+        }),
+      ],
+      breadcrumbs: true,
+    };
+
+    expect(getActiveVersion(test, '/docs')?.name).toBe('current');
+  });
+
+  it('getActiveVersion with trailing slash', () => {
+    const test: GlobalPluginData = {
+      path: 'docs',
+      versions: [
+        createVersion({label: 'current', path: '/docs/', isLast: false}),
+        createVersion({
+          label: 'version2',
+          path: '/docs/version2/',
+          isLast: true,
+        }),
+        createVersion({
+          label: 'version1',
+          path: '/docs/version1/',
+          isLast: false,
+        }),
+      ],
+      breadcrumbs: true,
+    };
+    expect(getActiveVersion(test, '/docs')?.name).toBe('current');
+  });
+
+  it('getActiveVersion docs only without trailing slash', () => {
+    const test: GlobalPluginData = {
+      path: 'docs',
+      versions: [
+        createVersion({label: 'current', path: '/', isLast: false}),
+        createVersion({label: 'version2', path: '/version2', isLast: true}),
+        createVersion({label: 'version1', path: '/version1', isLast: false}),
+      ],
+
+      breadcrumbs: true,
+    };
+
+    expect(getActiveVersion(test, '/')?.name).toBe('current');
+  });
+
+  it('getActiveVersion docs only with trailing slash', () => {
+    const test: GlobalPluginData = {
+      path: 'docs',
+      versions: [
+        createVersion({label: 'current', path: '/', isLast: false}),
+        createVersion({label: 'version2', path: '/version2/', isLast: true}),
+        createVersion({label: 'version1', path: '/version1/', isLast: false}),
+      ],
+      breadcrumbs: true,
+    };
+
+    expect(getActiveVersion(test, '/')?.name).toBe('current');
   });
 
   it('getActiveDocContext', () => {
